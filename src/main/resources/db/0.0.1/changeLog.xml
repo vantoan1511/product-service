@@ -1,0 +1,184 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="${author}" id="${id}-1">
+        <createTable tableName="ps_brand">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="slug" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="description" type="TEXT"/>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="modified_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="${id}-2" author="${author}">
+        <createTable tableName="ps_category">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="slug" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="description" type="TEXT"/>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="modified_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="${id}-3" author="${author}">
+        <createTable tableName="ps_model">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="slug" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="description" type="TEXT"/>
+
+            <column name="brand_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="modified_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="${id}-4" author="${author}">
+        <createTable tableName="ps_product">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="name" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="slug" type="VARCHAR(60)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="description" type="TEXT"/>
+
+            <column name="base_price" type="DECIMAL(15, 2)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="sale_price" type="DECIMAL(15, 2)"/>
+
+            <column name="stock_quantity" type="INT" defaultValueNumeric="0"/>
+
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true"/>
+
+            <column name="weight" type="BIGINT"/>
+
+            <column name="color" type="VARCHAR(255)"/>
+
+            <column name="processor" type="VARCHAR(255)"/>
+
+            <column name="gpu" type="VARCHAR(255)"/>
+
+            <column name="ram" type="INT"/>
+
+            <column name="storage_type" type="VARCHAR(255)"/>
+
+            <column name="storage_capacity" type="INT"/>
+
+            <column name="os" type="VARCHAR(255)"/>
+
+            <column name="screen_size" type="BIGINT"/>
+
+            <column name="battery_capacity" type="BIGINT"/>
+
+            <column name="warranty" type="INT"/>
+
+            <column name="view_count" type="BIGINT" defaultValueNumeric="0"/>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="modified_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="category_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="model_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="${id}-5" author="${author}">
+        <addForeignKeyConstraint baseTableName="ps_model"
+                                 baseColumnNames="brand_id"
+                                 constraintName="fk_model_brand"
+                                 referencedTableName="ps_brand"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="${id}-6" author="${author}">
+        <addForeignKeyConstraint baseTableName="ps_product"
+                                 baseColumnNames="model_id"
+                                 constraintName="fk_product_model"
+                                 referencedTableName="ps_model"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="${id}-7" author="${author}">
+        <addForeignKeyConstraint baseTableName="ps_product"
+                                 baseColumnNames="category_id"
+                                 constraintName="fk_product_category"
+                                 referencedTableName="ps_category"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>
