@@ -1,27 +1,136 @@
 package com.shopbee.productservice.service;
 
-import com.shopbee.productservice.dto.PageRequest;
-import com.shopbee.productservice.dto.PagedResponse;
+import com.shopbee.productservice.dto.*;
+import com.shopbee.productservice.entity.Category;
+import com.shopbee.productservice.entity.Model;
 import com.shopbee.productservice.entity.Product;
+import com.shopbee.productservice.entity.enums.Color;
+import com.shopbee.productservice.entity.enums.OS;
+import com.shopbee.productservice.entity.enums.StorageType;
+import com.shopbee.productservice.exception.ProductServiceException;
+import com.shopbee.productservice.mapper.ProductMapper;
 import com.shopbee.productservice.repository.ProductRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.core.Response;
 
 import java.util.List;
 
 @ApplicationScoped
+@Transactional
 public class ProductService {
+
+    ModelService modelService;
+
+    CategoryService categoryService;
 
     ProductRepository productRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    ProductMapper productMapper;
+
+    public ProductService(ModelService modelService,
+                          CategoryService categoryService,
+                          ProductRepository productRepository,
+                          ProductMapper productMapper) {
+        this.modelService = modelService;
+        this.categoryService = categoryService;
         this.productRepository = productRepository;
+        this.productMapper = productMapper;
     }
 
-    public PagedResponse<Product> getByCriteria(@Valid PageRequest pageRequest) {
+    public PagedResponse<Product> getByCriteria(@Valid SortCriteria sortCriteria,
+                                                @Valid PageRequest pageRequest) {
         List<Product> pagedProducts =
-                productRepository.findByCriteria(pageRequest.getPage() - 1, pageRequest.getSize());
-        return new PagedResponse<Product>(productRepository.countAllProducts(),
-                (long) pagedProducts.size(), pageRequest.getPage(), pageRequest.getSize(), pagedProducts);
+                productRepository.findByCriteria(sortCriteria, pageRequest);
+        long totalProducts = productRepository.count();
+        return PagedResponse.from(totalProducts, pageRequest, pagedProducts);
+    }
+
+    public Product getById(Long id) {
+        return productRepository.findByIdOptional(id)
+                .orElseThrow(() -> new ProductServiceException("Product not found", Response.Status.NOT_FOUND));
+    }
+
+    public Product getBySlug(String slug) {
+        return productRepository.findBySlug(slug)
+                .orElseThrow(() -> new ProductServiceException("Product not found", Response.Status.NOT_FOUND));
+    }
+
+    public void increaseView(String slug) {
+        Product product = getBySlug(slug);
+        increaseView(product);
+    }
+
+    public Product create(@Valid ProductRequest productRequest) {
+        productRepository.findBySlug(productRequest.getSlug())
+                .ifPresent((product) -> {
+                    throw new ProductServiceException("Slug existed", Response.Status.CONFLICT);
+                });
+
+        Product product = productMapper.toProduct(productRequest);
+        Model model = modelService.getBySlug(productRequest.getModel());
+        Category category = categoryService.getBySlug(productRequest.getCategory());
+
+        product.setUserId(1L);
+        product.setModel(model);
+        product.setCategory(category);
+
+        productRepository.persist(product);
+        return product;
+    }
+
+    public void update(Long id, @Valid ProductRequest productRequest) {
+        productRepository.findBySlug(productRequest.getSlug())
+                .ifPresent((product) -> validateProductSlug(id, product));
+
+        Model model = modelService.getBySlug(productRequest.getModel());
+        Category category = categoryService.getBySlug(productRequest.getCategory());
+
+        Product product = getById(id);
+        product.setName(productRequest.getName());
+        product.setSlug(productRequest.getSlug());
+        product.setDescription(productRequest.getDescription());
+        product.setBasePrice(productRequest.getBasePrice());
+        product.setSalePrice(productRequest.getSalePrice());
+        product.setStockQuantity(productRequest.getStockQuantity());
+        product.setActive(productRequest.isActive());
+        product.setWeight(productRequest.getWeight());
+        product.setColor(ProductMapper.toColor(productRequest.getColor()));
+        product.setProcessor(productRequest.getProcessor());
+        product.setGpu(productRequest.getGpu());
+        product.setRam(productRequest.getRam());
+        product.setStorageType(ProductMapper.toStorageType(productRequest.getStorageType()));
+        product.setOs(ProductMapper.toOS(productRequest.getOs()));
+        product.setScreenSize(productRequest.getScreenSize());
+        product.setBatteryCapacity(productRequest.getBatteryCapacity());
+        product.setWarranty(productRequest.getWarranty());
+        product.setModel(model);
+        product.setCategory(category);
+    }
+
+    public void updateQuantity(@Valid ProductQuantityRequest productQuantityRequest) {
+        Product product = getById(productQuantityRequest.getId());
+        product.setStockQuantity(productQuantityRequest.getQuantity());
+    }
+
+    public void delete(List<Long> ids) {
+        ids.forEach(this::delete);
+    }
+
+    private void delete(Long id) {
+        Product product = getById(id);
+        productRepository.delete(product);
+    }
+
+    private void increaseView(Product product) {
+        long viewCount = product.getViewCount();
+        product.setViewCount(++viewCount);
+    }
+
+    private void validateProductSlug(Long id, Product product) {
+        if (!id.equals(product.getId())) {
+            throw new ProductServiceException("Slug existed", Response.Status.CONFLICT);
+        }
     }
 }

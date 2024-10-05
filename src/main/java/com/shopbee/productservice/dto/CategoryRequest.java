@@ -10,12 +10,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BrandRequest {
+public class CategoryRequest {
 
-    @NotBlank(message = "Brand name is required")
+    @NotBlank(message = "Category name is required")
     private String name;
 
-    @NotBlank(message = "Brand name is required")
+    @NotBlank(message = "Category slug is required")
     private String slug;
 
     private String description;

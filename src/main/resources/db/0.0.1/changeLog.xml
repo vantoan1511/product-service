@@ -112,7 +112,7 @@
 
             <column name="active" type="BOOLEAN" defaultValueBoolean="true"/>
 
-            <column name="weight" type="BIGINT"/>
+            <column name="weight" type="DECIMAL(5, 2)"/>
 
             <column name="color" type="VARCHAR(255)"/>
 
@@ -128,11 +128,11 @@
 
             <column name="os" type="VARCHAR(255)"/>
 
-            <column name="screen_size" type="BIGINT"/>
+            <column name="screen_size" type="DECIMAL(5, 2)"/>
 
-            <column name="battery_capacity" type="BIGINT"/>
+            <column name="battery_capacity" type="DECIMAL(5, 2)"/>
 
-            <column name="warranty" type="INT"/>
+            <column name="warranty" type="DECIMAL(5, 2)"/>
 
             <column name="view_count" type="BIGINT" defaultValueNumeric="0"/>
 

@@ -35,7 +35,8 @@ public class ModelService {
         this.modelMapper = modelMapper;
     }
 
-    public PagedResponse<Model> getByCriteria(@Valid SortCriteria sortCriteria, @Valid PageRequest pageRequest) {
+    public PagedResponse<Model> getByCriteria(@Valid SortCriteria sortCriteria,
+                                              @Valid PageRequest pageRequest) {
         List<Model> pagedModels = modelRepository.findByCriteria(sortCriteria, pageRequest);
         Long totalItems = modelRepository.count();
         return PagedResponse.from(totalItems, pageRequest, pagedModels);

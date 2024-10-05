@@ -6,6 +6,9 @@ import lombok.Getter;
 public enum SortField {
     NAME("name"),
     SLUG("slug"),
+    BASE_PRICE("basePrice"),
+    SALE_PRICE("salePrice"),
+    VIEW_COUNT("viewCount"),
     CREATED_AT("createdAt"),
     MODIFIED_AT("modifiedAt");
 

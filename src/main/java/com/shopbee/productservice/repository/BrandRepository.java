@@ -3,11 +3,14 @@ package com.shopbee.productservice.repository;
 import com.shopbee.productservice.dto.PageRequest;
 import com.shopbee.productservice.dto.SortCriteria;
 import com.shopbee.productservice.entity.Brand;
+import com.shopbee.productservice.enums.SortField;
+import com.shopbee.productservice.exception.ProductServiceException;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.Response;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @ApplicationScoped
 public class BrandRepository extends AbstractRepository implements PanacheRepository<Brand> {

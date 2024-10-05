@@ -12,7 +12,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -49,7 +48,7 @@ public class Product {
     private boolean active = true;
 
     @Column
-    private Long weight;
+    private Double weight;
 
     @Column
     @Enumerated(EnumType.STRING)
@@ -76,13 +75,13 @@ public class Product {
     private OS os;
 
     @Column(name = "screen_size")
-    private Long screenSize;
+    private Double screenSize;
 
     @Column(name = "battery_capacity")
-    private Long batteryCapacity;
+    private Double batteryCapacity;
 
     @Column
-    private Integer warranty;
+    private Double warranty;
 
     @Column(name = "view_count")
     private Long viewCount = 0L;
