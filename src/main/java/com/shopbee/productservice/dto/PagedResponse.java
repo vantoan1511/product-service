@@ -32,7 +32,7 @@ public class PagedResponse<T> {
 
     public static <T> PagedResponse<T> from(List<T> items, PageRequest pageRequest) {
         List<T> pagedItems = items.stream()
-                .skip((pageRequest.getPage() - 1) * pageRequest.getSize())
+                .skip((long) (pageRequest.getPage() - 1) * pageRequest.getSize())
                 .limit(pageRequest.getSize())
                 .toList();
         return new PagedResponse<>((long) items.size(), (long) pagedItems.size(), pageRequest.getPage(), pageRequest.getSize(), pagedItems);

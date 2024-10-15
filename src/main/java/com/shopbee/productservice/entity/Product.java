@@ -1,5 +1,6 @@
 package com.shopbee.productservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.shopbee.productservice.entity.enums.Color;
 import com.shopbee.productservice.entity.enums.OS;
 import com.shopbee.productservice.entity.enums.StorageType;
@@ -13,6 +14,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -96,6 +98,10 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    @OneToMany(mappedBy = "product")
+    @JsonIgnore
+    private List<ProductImage> images;
 
     @Column(name = "created_at")
     @CreationTimestamp

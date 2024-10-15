@@ -14,7 +14,7 @@ import lombok.Setter;
 public class SortCriteria {
 
     @QueryParam("sortBy")
-    private SortField sortField = SortField.MODIFIED_AT;
+    private SortField sortField = SortField.CREATED_AT;
 
     @QueryParam("ascending")
     private boolean ascending;

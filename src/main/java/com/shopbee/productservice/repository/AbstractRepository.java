@@ -33,6 +33,6 @@ public abstract class AbstractRepository {
     }
 
     protected List<SortField> getSupportedSortFields() {
-        return List.of(SortField.NAME, SortField.SLUG, SortField.CREATED_AT, SortField.MODIFIED_AT);
+        return List.of(SortField.NAME, SortField.SLUG, SortField.CREATED_AT);
     }
 }

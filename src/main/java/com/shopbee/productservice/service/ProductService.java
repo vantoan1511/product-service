@@ -4,17 +4,19 @@ import com.shopbee.productservice.dto.*;
 import com.shopbee.productservice.entity.Category;
 import com.shopbee.productservice.entity.Model;
 import com.shopbee.productservice.entity.Product;
-import com.shopbee.productservice.entity.enums.Color;
-import com.shopbee.productservice.entity.enums.OS;
-import com.shopbee.productservice.entity.enums.StorageType;
 import com.shopbee.productservice.exception.ProductServiceException;
 import com.shopbee.productservice.mapper.ProductMapper;
 import com.shopbee.productservice.repository.ProductRepository;
+import com.shopbee.productservice.service.user.User;
+import com.shopbee.productservice.service.user.UserService;
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang3.math.NumberUtils;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @ApplicationScoped
@@ -22,21 +24,24 @@ import java.util.List;
 public class ProductService {
 
     ModelService modelService;
-
     CategoryService categoryService;
-
     ProductRepository productRepository;
-
     ProductMapper productMapper;
+    UserService userService;
+    SecurityIdentity identity;
 
     public ProductService(ModelService modelService,
                           CategoryService categoryService,
                           ProductRepository productRepository,
-                          ProductMapper productMapper) {
+                          ProductMapper productMapper,
+                          UserService userService,
+                          SecurityIdentity identity) {
         this.modelService = modelService;
         this.categoryService = categoryService;
         this.productRepository = productRepository;
         this.productMapper = productMapper;
+        this.userService = userService;
+        this.identity = identity;
     }
 
     public PagedResponse<Product> getByCriteria(@Valid SortCriteria sortCriteria,
@@ -67,12 +72,15 @@ public class ProductService {
                 .ifPresent((product) -> {
                     throw new ProductServiceException("Slug existed", Response.Status.CONFLICT);
                 });
+        validatePrice(productRequest);
+        normalizePrice(productRequest);
 
+        User user = userService.getByUsername(identity.getPrincipal().getName());
         Product product = productMapper.toProduct(productRequest);
         Model model = modelService.getBySlug(productRequest.getModel());
         Category category = categoryService.getBySlug(productRequest.getCategory());
 
-        product.setUserId(1L);
+        product.setUserId(user.getId());
         product.setModel(model);
         product.setCategory(category);
 
@@ -83,6 +91,9 @@ public class ProductService {
     public void update(Long id, @Valid ProductRequest productRequest) {
         productRepository.findBySlug(productRequest.getSlug())
                 .ifPresent((product) -> validateProductSlug(id, product));
+
+        validatePrice(productRequest);
+        normalizePrice(productRequest);
 
         Model model = modelService.getBySlug(productRequest.getModel());
         Category category = categoryService.getBySlug(productRequest.getCategory());
@@ -131,6 +142,18 @@ public class ProductService {
     private void validateProductSlug(Long id, Product product) {
         if (!id.equals(product.getId())) {
             throw new ProductServiceException("Slug existed", Response.Status.CONFLICT);
+        }
+    }
+
+    private void validatePrice(ProductRequest productRequest) {
+        if (productRequest.getSalePrice().compareTo(productRequest.getBasePrice()) > 0) {
+            throw new ProductServiceException("Sale price must less or equal base price", Response.Status.BAD_REQUEST);
+        }
+    }
+
+    private void normalizePrice(ProductRequest productRequest) {
+        if (productRequest.getSalePrice() == null || productRequest.getSalePrice().equals(BigDecimal.ZERO)) {
+            productRequest.setSalePrice(productRequest.getBasePrice());
         }
     }
 }

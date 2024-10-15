@@ -6,6 +6,7 @@ import com.shopbee.productservice.dto.ProductRequest;
 import com.shopbee.productservice.dto.SortCriteria;
 import com.shopbee.productservice.entity.Product;
 import com.shopbee.productservice.security.constant.Role;
+import com.shopbee.productservice.service.ProductImageService;
 import com.shopbee.productservice.service.ProductService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
@@ -19,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.List;
-import java.util.logging.Level;
 
 @Path("products")
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,9 +32,12 @@ public class ProductResource {
     private String secretAPIKey;
 
     ProductService productService;
+    ProductImageService productImageService;
 
-    public ProductResource(ProductService productService) {
+    public ProductResource(ProductService productService,
+                           ProductImageService productImageService) {
         this.productService = productService;
+        this.productImageService = productImageService;
     }
 
     @GET
@@ -84,4 +87,33 @@ public class ProductResource {
         return Response.noContent().build();
     }
 
+    @GET
+    @Path("{id}/images")
+    public Response getImages(@PathParam("id") Long id) {
+        return Response.ok(productImageService.getProductImages(id)).build();
+    }
+
+    @PUT
+    @Path("{id}/images")
+    @RolesAllowed({Role.ROLE_ADMIN})
+    public Response updateImages(@PathParam("id") Long id, List<Long> imageIds) {
+        productImageService.updateImages(id, imageIds);
+        return Response.ok().build();
+    }
+
+    @PATCH
+    @Path("{id}/images/{imageId}")
+    @RolesAllowed({Role.ROLE_ADMIN})
+    public Response setFeaturedImage(@PathParam("id") Long productId, Long imageId) {
+        productImageService.setFeaturedImage(productId, imageId);
+        return Response.ok().build();
+    }
+
+    @DELETE
+    @Path("{id}/images")
+    @RolesAllowed({Role.ROLE_ADMIN})
+    public Response removeImages(@PathParam("id") Long id, List<Long> imageIds) {
+        productImageService.removeImages(id, imageIds);
+        return Response.noContent().build();
+    }
 }

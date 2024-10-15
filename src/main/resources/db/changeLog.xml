@@ -8,4 +8,5 @@
     <property name="id" value="ps"/>
 
     <include file="/db/0.0.1/changeLog.xml"/>
+    <include file="/db/0.0.2/changeLog.xml"/>
 </databaseChangeLog>

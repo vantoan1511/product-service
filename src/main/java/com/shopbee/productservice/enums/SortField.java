@@ -10,7 +10,8 @@ public enum SortField {
     SALE_PRICE("salePrice"),
     VIEW_COUNT("viewCount"),
     CREATED_AT("createdAt"),
-    MODIFIED_AT("modifiedAt");
+    STATUS("active"),
+    STOCK("stockQuantity");
 
     final String value;
 
