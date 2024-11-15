@@ -14,10 +14,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.core.Response;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 @Transactional
@@ -44,11 +44,21 @@ public class ProductService {
         this.identity = identity;
     }
 
-    public PagedResponse<Product> getByCriteria(@Valid SortCriteria sortCriteria,
+    public PagedResponse<Product> getByCriteria(@Valid FilterCriteria filterCriteria,
+                                                @Valid SortCriteria sortCriteria,
                                                 @Valid PageRequest pageRequest) {
+        if (Optional.ofNullable(filterCriteria.getBrandListString()).isPresent()) {
+            List<String> brands = List.of(filterCriteria.getBrandListString().split(","));
+            filterCriteria.setBrands(brands);
+        }
+        if (Optional.ofNullable(filterCriteria.getCategoryListString()).isPresent()) {
+            List<String> categories = List.of(filterCriteria.getCategoryListString().split(","));
+            filterCriteria.setCategories(categories);
+        }
+
         List<Product> pagedProducts =
-                productRepository.findByCriteria(sortCriteria, pageRequest);
-        long totalProducts = productRepository.count();
+                productRepository.findByCriteria(filterCriteria, sortCriteria, pageRequest);
+        long totalProducts = productRepository.count(filterCriteria);
         return PagedResponse.from(totalProducts, pageRequest, pagedProducts);
     }
 

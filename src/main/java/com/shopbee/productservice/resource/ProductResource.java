@@ -1,9 +1,6 @@
 package com.shopbee.productservice.resource;
 
-import com.shopbee.productservice.dto.PageRequest;
-import com.shopbee.productservice.dto.ProductQuantityRequest;
-import com.shopbee.productservice.dto.ProductRequest;
-import com.shopbee.productservice.dto.SortCriteria;
+import com.shopbee.productservice.dto.*;
 import com.shopbee.productservice.entity.Product;
 import com.shopbee.productservice.security.constant.Role;
 import com.shopbee.productservice.service.ProductImageService;
@@ -41,9 +38,10 @@ public class ProductResource {
     }
 
     @GET
-    public Response getByCriteria(@BeanParam SortCriteria sortCriteria,
+    public Response getByCriteria(@BeanParam FilterCriteria filterCriteria,
+                                  @BeanParam SortCriteria sortCriteria,
                                   @BeanParam PageRequest pageRequest) {
-        return Response.ok(productService.getByCriteria(sortCriteria, pageRequest)).build();
+        return Response.ok(productService.getByCriteria(filterCriteria, sortCriteria, pageRequest)).build();
     }
 
     @GET
