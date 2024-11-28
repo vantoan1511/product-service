@@ -30,6 +30,9 @@ public class FilterCriteria {
     @QueryParam("keyword")
     private String keyword;
 
+    @QueryParam("active")
+    private Boolean active;
+
     private List<String> brands;
     private List<String> categories;
 }
