@@ -53,8 +53,8 @@ public class ProductResource {
 
     @POST
     @RolesAllowed({Role.ROLE_ADMIN})
-    public Response create(ProductCreattionRequest productCreattionRequest, @Context UriInfo uriInfo) {
-        Product product = productService.create(productCreattionRequest);
+    public Response create(ProductCreationRequest productCreationRequest, @Context UriInfo uriInfo) {
+        Product product = productService.create(productCreationRequest);
         URI uri = uriInfo.getAbsolutePathBuilder().path(product.getSlug()).build();
         return Response.created(uri).entity(product).build();
     }
@@ -62,8 +62,8 @@ public class ProductResource {
     @PUT
     @Path("{id}")
     @RolesAllowed({Role.ROLE_ADMIN})
-    public Response update(@PathParam("id") Long id, ProductCreattionRequest productCreattionRequest) {
-        productService.update(id, productCreattionRequest);
+    public Response update(@PathParam("id") Long id, ProductCreationRequest productCreationRequest) {
+        productService.update(id, productCreationRequest);
         return Response.ok().build();
     }
 

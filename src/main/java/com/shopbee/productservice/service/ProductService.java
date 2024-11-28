@@ -118,21 +118,21 @@ public class ProductService {
     /**
      * Create product.
      *
-     * @param productCreattionRequest the product creattion request
+     * @param productCreationRequest the product creation request
      * @return the product
      */
-    public Product create(@Valid ProductCreattionRequest productCreattionRequest) {
-        productRepository.findBySlug(productCreattionRequest.getSlug())
+    public Product create(@Valid ProductCreationRequest productCreationRequest) {
+        productRepository.findBySlug(productCreationRequest.getSlug())
                 .ifPresent((product) -> {
                     throw new ProductServiceException("Slug existed", Response.Status.CONFLICT);
                 });
-        validatePrice(productCreattionRequest);
-        normalizePrice(productCreattionRequest);
+        validatePrice(productCreationRequest);
+        normalizePrice(productCreationRequest);
 
         User user = userService.getByUsername(identity.getPrincipal().getName());
-        Product product = productMapper.toProduct(productCreattionRequest);
-        Model model = modelService.getBySlug(productCreattionRequest.getModel());
-        Category category = categoryService.getBySlug(productCreattionRequest.getCategory());
+        Product product = productMapper.toProduct(productCreationRequest);
+        Model model = modelService.getBySlug(productCreationRequest.getModel());
+        Category category = categoryService.getBySlug(productCreationRequest.getCategory());
 
         product.setUserId(user.getId());
         product.setModel(model);
@@ -146,36 +146,36 @@ public class ProductService {
      * Update.
      *
      * @param id                      the id
-     * @param productCreattionRequest the product creattion request
+     * @param productCreationRequest the product creattion request
      */
-    public void update(Long id, @Valid ProductCreattionRequest productCreattionRequest) {
-        productRepository.findBySlug(productCreattionRequest.getSlug())
+    public void update(Long id, @Valid ProductCreationRequest productCreationRequest) {
+        productRepository.findBySlug(productCreationRequest.getSlug())
                 .ifPresent((product) -> validateProductSlug(id, product));
 
-        validatePrice(productCreattionRequest);
-        normalizePrice(productCreattionRequest);
+        validatePrice(productCreationRequest);
+        normalizePrice(productCreationRequest);
 
-        Model model = modelService.getBySlug(productCreattionRequest.getModel());
-        Category category = categoryService.getBySlug(productCreattionRequest.getCategory());
+        Model model = modelService.getBySlug(productCreationRequest.getModel());
+        Category category = categoryService.getBySlug(productCreationRequest.getCategory());
 
         Product product = getById(id);
-        product.setName(productCreattionRequest.getName());
-        product.setSlug(productCreattionRequest.getSlug());
-        product.setDescription(productCreattionRequest.getDescription());
-        product.setBasePrice(productCreattionRequest.getBasePrice());
-        product.setSalePrice(productCreattionRequest.getSalePrice());
-        product.setStockQuantity(productCreattionRequest.getStockQuantity());
-        product.setActive(productCreattionRequest.isActive());
-        product.setWeight(productCreattionRequest.getWeight());
-        product.setColor(ProductMapper.toColor(productCreattionRequest.getColor()));
-        product.setProcessor(productCreattionRequest.getProcessor());
-        product.setGpu(productCreattionRequest.getGpu());
-        product.setRam(productCreattionRequest.getRam());
-        product.setStorageType(ProductMapper.toStorageType(productCreattionRequest.getStorageType()));
-        product.setOs(ProductMapper.toOS(productCreattionRequest.getOs()));
-        product.setScreenSize(productCreattionRequest.getScreenSize());
-        product.setBatteryCapacity(productCreattionRequest.getBatteryCapacity());
-        product.setWarranty(productCreattionRequest.getWarranty());
+        product.setName(productCreationRequest.getName());
+        product.setSlug(productCreationRequest.getSlug());
+        product.setDescription(productCreationRequest.getDescription());
+        product.setBasePrice(productCreationRequest.getBasePrice());
+        product.setSalePrice(productCreationRequest.getSalePrice());
+        product.setStockQuantity(productCreationRequest.getStockQuantity());
+        product.setActive(productCreationRequest.isActive());
+        product.setWeight(productCreationRequest.getWeight());
+        product.setColor(ProductMapper.toColor(productCreationRequest.getColor()));
+        product.setProcessor(productCreationRequest.getProcessor());
+        product.setGpu(productCreationRequest.getGpu());
+        product.setRam(productCreationRequest.getRam());
+        product.setStorageType(ProductMapper.toStorageType(productCreationRequest.getStorageType()));
+        product.setOs(ProductMapper.toOS(productCreationRequest.getOs()));
+        product.setScreenSize(productCreationRequest.getScreenSize());
+        product.setBatteryCapacity(productCreationRequest.getBatteryCapacity());
+        product.setWarranty(productCreationRequest.getWarranty());
         product.setModel(model);
         product.setCategory(category);
     }
@@ -234,10 +234,10 @@ public class ProductService {
     /**
      * Validate price.
      *
-     * @param productCreattionRequest the product creattion request
+     * @param productCreationRequest the product creattion request
      */
-    private void validatePrice(ProductCreattionRequest productCreattionRequest) {
-        if (productCreattionRequest.getSalePrice().compareTo(productCreattionRequest.getBasePrice()) > 0) {
+    private void validatePrice(ProductCreationRequest productCreationRequest) {
+        if (productCreationRequest.getSalePrice().compareTo(productCreationRequest.getBasePrice()) > 0) {
             throw new ProductServiceException("Sale price must less or equal base price", Response.Status.BAD_REQUEST);
         }
     }
@@ -245,11 +245,11 @@ public class ProductService {
     /**
      * Normalize price.
      *
-     * @param productCreattionRequest the product creattion request
+     * @param productCreationRequest the product creattion request
      */
-    private void normalizePrice(ProductCreattionRequest productCreattionRequest) {
-        if (productCreattionRequest.getSalePrice() == null || productCreattionRequest.getSalePrice().equals(BigDecimal.ZERO)) {
-            productCreattionRequest.setSalePrice(productCreattionRequest.getBasePrice());
+    private void normalizePrice(ProductCreationRequest productCreationRequest) {
+        if (productCreationRequest.getSalePrice() == null || productCreationRequest.getSalePrice().equals(BigDecimal.ZERO)) {
+            productCreationRequest.setSalePrice(productCreationRequest.getBasePrice());
         }
     }
 }
