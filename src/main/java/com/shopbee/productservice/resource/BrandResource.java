@@ -1,6 +1,6 @@
 package com.shopbee.productservice.resource;
 
-import com.shopbee.productservice.dto.BrandRequest;
+import com.shopbee.productservice.dto.BrandCreationRequest;
 import com.shopbee.productservice.dto.PageRequest;
 import com.shopbee.productservice.dto.SortCriteria;
 import com.shopbee.productservice.entity.Brand;
@@ -41,8 +41,8 @@ public class BrandResource {
 
     @POST
     @RolesAllowed({Role.ROLE_ADMIN})
-    public Response create(BrandRequest brandRequest, @Context UriInfo uriInfo) {
-        Brand brand = brandService.create(brandRequest);
+    public Response create(BrandCreationRequest brandCreationRequest, @Context UriInfo uriInfo) {
+        Brand brand = brandService.create(brandCreationRequest);
         URI uri = uriInfo.getAbsolutePathBuilder().path(brand.getSlug()).build();
         return Response.created(uri).entity(brand).build();
     }
@@ -50,8 +50,8 @@ public class BrandResource {
     @PUT
     @Path("{id}")
     @RolesAllowed({Role.ROLE_ADMIN})
-    public Response update(@PathParam("id") Long id, BrandRequest brandRequest) {
-        brandService.update(id, brandRequest);
+    public Response update(@PathParam("id") Long id, BrandCreationRequest brandCreationRequest) {
+        brandService.update(id, brandCreationRequest);
         return Response.ok().build();
     }
 

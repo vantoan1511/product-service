@@ -1,6 +1,6 @@
 package com.shopbee.productservice.service;
 
-import com.shopbee.productservice.dto.ModelRequest;
+import com.shopbee.productservice.dto.ModelCreationRequest;
 import com.shopbee.productservice.dto.PageRequest;
 import com.shopbee.productservice.dto.PagedResponse;
 import com.shopbee.productservice.dto.SortCriteria;
@@ -14,7 +14,6 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.core.Response;
 
-import java.util.HashMap;
 import java.util.List;
 
 @ApplicationScoped
@@ -47,19 +46,19 @@ public class ModelService {
                 .orElseThrow(() -> new ProductServiceException("Model not found: " + slug, Response.Status.NOT_FOUND));
     }
 
-    public Model create(@Valid ModelRequest modelRequest) {
-        modelRepository.findBySlug(modelRequest.getSlug()).ifPresent((model) -> {
+    public Model create(@Valid ModelCreationRequest modelCreationRequest) {
+        modelRepository.findBySlug(modelCreationRequest.getSlug()).ifPresent((model) -> {
             throw new ProductServiceException("Slug existed", Response.Status.CONFLICT);
         });
 
-        Brand brand = brandService.getBySlug(modelRequest.getBrandSlug());
-        Model model = modelMapper.toModel(modelRequest);
+        Brand brand = brandService.getBySlug(modelCreationRequest.getBrandSlug());
+        Model model = modelMapper.toModel(modelCreationRequest);
         model.setBrand(brand);
         modelRepository.persist(model);
         return model;
     }
 
-    public void update(Long id, ModelRequest modelUpdate) {
+    public void update(Long id, ModelCreationRequest modelUpdate) {
         modelRepository.findBySlug(modelUpdate.getSlug()).ifPresent(model -> {
             if (!id.equals(model.getId())) {
                 throw new ProductServiceException("Slug existed", Response.Status.CONFLICT);

@@ -1,6 +1,6 @@
 package com.shopbee.productservice.resource;
 
-import com.shopbee.productservice.dto.ModelRequest;
+import com.shopbee.productservice.dto.ModelCreationRequest;
 import com.shopbee.productservice.dto.PageRequest;
 import com.shopbee.productservice.dto.SortCriteria;
 import com.shopbee.productservice.entity.Model;
@@ -41,8 +41,8 @@ public class ModelResource {
 
     @POST
     @RolesAllowed({Role.ROLE_ADMIN})
-    public Response create(ModelRequest modelRequest, @Context UriInfo uriInfo) {
-        Model model = modelService.create(modelRequest);
+    public Response create(ModelCreationRequest modelCreationRequest, @Context UriInfo uriInfo) {
+        Model model = modelService.create(modelCreationRequest);
         URI uri = uriInfo.getAbsolutePathBuilder().path(model.getSlug()).build();
         return Response.created(uri).entity(model).build();
     }
@@ -50,8 +50,8 @@ public class ModelResource {
     @PUT
     @Path("{id}")
     @RolesAllowed({Role.ROLE_ADMIN})
-    public Response update(@PathParam("id") Long id, ModelRequest modelRequest) {
-        modelService.update(id, modelRequest);
+    public Response update(@PathParam("id") Long id, ModelCreationRequest modelCreationRequest) {
+        modelService.update(id, modelCreationRequest);
         return Response.ok().build();
     }
 

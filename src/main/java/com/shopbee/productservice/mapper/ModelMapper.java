@@ -1,13 +1,13 @@
 package com.shopbee.productservice.mapper;
 
-import com.shopbee.productservice.dto.ModelRequest;
+import com.shopbee.productservice.dto.ModelCreationRequest;
 import com.shopbee.productservice.entity.Model;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "cdi")
 public interface ModelMapper {
 
-    Model toModel(ModelRequest modelRequest);
+    Model toModel(ModelCreationRequest modelCreationRequest);
 
-    ModelRequest toModelRequest(Model model);
+    ModelCreationRequest toModelRequest(Model model);
 }

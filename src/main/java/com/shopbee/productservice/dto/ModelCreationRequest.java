@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModelRequest {
+public class ModelCreationRequest {
     @NotBlank(message = "Brand name is required")
     private String name;
 

@@ -1,6 +1,6 @@
 package com.shopbee.productservice.mapper;
 
-import com.shopbee.productservice.dto.ProductRequest;
+import com.shopbee.productservice.dto.ProductCreattionRequest;
 import com.shopbee.productservice.entity.Product;
 import com.shopbee.productservice.entity.enums.Color;
 import com.shopbee.productservice.entity.enums.OS;
@@ -19,7 +19,7 @@ public interface ProductMapper {
     @Mapping(target = "os", source = "os", qualifiedByName = "toOS")
     @Mapping(target = "color", source = "color", qualifiedByName = "toColor")
     @Mapping(target = "storageType", source = "storageType", qualifiedByName = "toStorageType")
-    Product toProduct(ProductRequest productRequest);
+    Product toProduct(ProductCreattionRequest productCreattionRequest);
 
     @Named("toOS")
     static OS toOS(String os) {

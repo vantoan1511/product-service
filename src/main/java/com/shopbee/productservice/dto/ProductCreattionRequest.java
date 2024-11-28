@@ -12,17 +12,16 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductRequest {
+public class ProductCreattionRequest {
 
     @NotBlank(message = "Name is required")
-    @Length(max = 60, message = "Max length is 60 character")
+    @Length(max = 255, message = "Max length is 255 character")
     private String name;
 
     @NotBlank(message = "Slug is required")
-    @Length(max = 60, message = "Max length is 60 characters")
+    @Length(max = 255, message = "Max length is 255 characters")
     private String slug;
 
-    @Length(max = 1000, message = "Max length is 1000 characters")
     private String description;
 
     @Min(value = 0, message = "Price must be greater than or equal 0")

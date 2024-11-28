@@ -1,12 +1,10 @@
 package com.shopbee.productservice.resource;
 
-import com.shopbee.productservice.dto.CategoryRequest;
+import com.shopbee.productservice.dto.CategoryCreationRequest;
 import com.shopbee.productservice.dto.PageRequest;
 import com.shopbee.productservice.dto.SortCriteria;
-import com.shopbee.productservice.entity.Brand;
 import com.shopbee.productservice.entity.Category;
 import com.shopbee.productservice.security.constant.Role;
-import com.shopbee.productservice.service.CategoryService;
 import com.shopbee.productservice.service.CategoryService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
@@ -43,8 +41,8 @@ public class CategoryResource {
 
     @POST
     @RolesAllowed({Role.ROLE_ADMIN})
-    public Response create(CategoryRequest categoryRequest, @Context UriInfo uriInfo) {
-        Category category = categoryService.create(categoryRequest);
+    public Response create(CategoryCreationRequest categoryCreationRequest, @Context UriInfo uriInfo) {
+        Category category = categoryService.create(categoryCreationRequest);
         URI uri = uriInfo.getAbsolutePathBuilder().path(category.getSlug()).build();
         return Response.created(uri).entity(category).build();
     }
@@ -52,8 +50,8 @@ public class CategoryResource {
     @PUT
     @Path("{id}")
     @RolesAllowed({Role.ROLE_ADMIN})
-    public Response update(@PathParam("id") Long id, CategoryRequest categoryRequest) {
-        categoryService.update(id, categoryRequest);
+    public Response update(@PathParam("id") Long id, CategoryCreationRequest categoryCreationRequest) {
+        categoryService.update(id, categoryCreationRequest);
         return Response.ok().build();
     }
 

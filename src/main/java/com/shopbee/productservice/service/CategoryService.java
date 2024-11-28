@@ -1,6 +1,6 @@
 package com.shopbee.productservice.service;
 
-import com.shopbee.productservice.dto.CategoryRequest;
+import com.shopbee.productservice.dto.CategoryCreationRequest;
 import com.shopbee.productservice.dto.PageRequest;
 import com.shopbee.productservice.dto.PagedResponse;
 import com.shopbee.productservice.dto.SortCriteria;
@@ -45,27 +45,27 @@ public class CategoryService {
                 .orElseThrow(() -> new ProductServiceException("Category not found", Response.Status.NOT_FOUND));
     }
 
-    public Category create(@Valid CategoryRequest categoryRequest) {
-        if (categoryRepository.existBySlug(categoryRequest.getSlug())) {
+    public Category create(@Valid CategoryCreationRequest categoryCreationRequest) {
+        if (categoryRepository.existBySlug(categoryCreationRequest.getSlug())) {
             throw new ProductServiceException("Slug existed", Response.Status.CONFLICT);
         }
 
-        Category category = categoryMapper.toCategory(categoryRequest);
+        Category category = categoryMapper.toCategory(categoryCreationRequest);
         categoryRepository.persist(category);
         return category;
     }
 
-    public void update(Long id, CategoryRequest categoryRequest) {
-        categoryRepository.findBySlug(categoryRequest.getSlug()).ifPresent(brand -> {
+    public void update(Long id, CategoryCreationRequest categoryCreationRequest) {
+        categoryRepository.findBySlug(categoryCreationRequest.getSlug()).ifPresent(brand -> {
             if (!id.equals(brand.getId())) {
                 throw new ProductServiceException("Slug existed", Response.Status.CONFLICT);
             }
         });
 
         Category category = getById(id);
-        category.setName(categoryRequest.getName());
-        category.setSlug(categoryRequest.getSlug());
-        category.setDescription(categoryRequest.getDescription());
+        category.setName(categoryCreationRequest.getName());
+        category.setSlug(categoryCreationRequest.getSlug());
+        category.setDescription(categoryCreationRequest.getDescription());
     }
 
     public void delete(List<Long> ids) {

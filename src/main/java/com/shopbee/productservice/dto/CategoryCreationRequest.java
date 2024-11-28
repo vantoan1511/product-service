@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CategoryRequest {
+public class CategoryCreationRequest {
 
     @NotBlank(message = "Category name is required")
     private String name;

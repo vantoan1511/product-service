@@ -1,6 +1,6 @@
 package com.shopbee.productservice.service;
 
-import com.shopbee.productservice.dto.BrandRequest;
+import com.shopbee.productservice.dto.BrandCreationRequest;
 import com.shopbee.productservice.dto.PageRequest;
 import com.shopbee.productservice.dto.PagedResponse;
 import com.shopbee.productservice.dto.SortCriteria;
@@ -44,17 +44,17 @@ public class BrandService {
                 .orElseThrow(() -> new ProductServiceException("Brand not found: " + id, Response.Status.NOT_FOUND));
     }
 
-    public Brand create(@Valid BrandRequest brandRequest) {
-        if (brandRepository.existBySlug(brandRequest.getSlug())) {
+    public Brand create(@Valid BrandCreationRequest brandCreationRequest) {
+        if (brandRepository.existBySlug(brandCreationRequest.getSlug())) {
             throw new ProductServiceException("Slug existed", Response.Status.CONFLICT);
         }
 
-        Brand brand = brandMapper.toBrand(brandRequest);
+        Brand brand = brandMapper.toBrand(brandCreationRequest);
         brandRepository.persist(brand);
         return brand;
     }
 
-    public void update(Long id, BrandRequest brandUpdate) {
+    public void update(Long id, BrandCreationRequest brandUpdate) {
         brandRepository.findBySlug(brandUpdate.getSlug()).ifPresent(brand -> {
             if (!id.equals(brand.getId())) {
                 throw new ProductServiceException("Slug existed", Response.Status.CONFLICT);
