@@ -7,10 +7,7 @@ import com.shopbee.productservice.service.ProductImageService;
 import com.shopbee.productservice.service.ProductService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.*;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +25,8 @@ public class ProductResource {
     @ConfigProperty(name = "API_KEY")
     private String secretAPIKey;
 
-    ProductService productService;
-    ProductImageService productImageService;
+    private final ProductService productService;
+    private final ProductImageService productImageService;
 
     public ProductResource(ProductService productService,
                            ProductImageService productImageService) {

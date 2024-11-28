@@ -7,13 +7,18 @@ import com.shopbee.productservice.entity.Product;
 import com.shopbee.productservice.exception.ProductServiceException;
 import com.shopbee.productservice.mapper.ProductMapper;
 import com.shopbee.productservice.repository.ProductRepository;
-import com.shopbee.productservice.service.user.User;
-import com.shopbee.productservice.service.user.UserService;
+import com.shopbee.productservice.shared.converter.impl.ProductConverter;
+import com.shopbee.productservice.shared.external.review.ReviewServiceClient;
+import com.shopbee.productservice.shared.external.review.ReviewStatistic;
+import com.shopbee.productservice.shared.external.user.User;
+import com.shopbee.productservice.shared.external.user.UserService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,10 +27,13 @@ import java.util.Optional;
 /**
  * The type Product service.
  */
+@Slf4j
 @ApplicationScoped
 @Transactional
 public class ProductService {
 
+    private final ProductConverter productConverter;
+    private final ReviewServiceClient reviewServiceClient;
     ModelService modelService;
     CategoryService categoryService;
     ProductRepository productRepository;
@@ -43,12 +51,16 @@ public class ProductService {
      * @param userService       the user service
      * @param identity          the identity
      */
-    public ProductService(ModelService modelService,
+    public ProductService(ProductConverter productConverter,
+                          @RestClient ReviewServiceClient reviewServiceClient,
+                          ModelService modelService,
                           CategoryService categoryService,
                           ProductRepository productRepository,
                           ProductMapper productMapper,
                           UserService userService,
                           SecurityIdentity identity) {
+        this.productConverter = productConverter;
+        this.reviewServiceClient = reviewServiceClient;
         this.modelService = modelService;
         this.categoryService = categoryService;
         this.productRepository = productRepository;
@@ -100,9 +112,17 @@ public class ProductService {
      * @param slug the slug
      * @return the by slug
      */
-    public Product getBySlug(String slug) {
-        return productRepository.findBySlug(slug)
+    public ProductResponse getBySlug(String slug) {
+        Product product = productRepository.findBySlug(slug)
                 .orElseThrow(() -> new ProductServiceException("Product not found", Response.Status.NOT_FOUND));
+        ProductResponse response = productConverter.convert(product);
+        try {
+            ReviewStatistic statistic = reviewServiceClient.getStatistic(slug);
+            response.setRating(statistic.getAverageRating());
+        } catch (Exception e) {
+            log.warn("Failed to get rating.");
+        }
+        return response;
     }
 
     /**
@@ -111,7 +131,7 @@ public class ProductService {
      * @param slug the slug
      */
     public void increaseView(String slug) {
-        Product product = getBySlug(slug);
+        Product product = productRepository.findBySlug(slug).orElseThrow(() -> new ProductServiceException("Product not found.", Response.Status.NOT_FOUND));
         increaseView(product);
     }
 
@@ -145,7 +165,7 @@ public class ProductService {
     /**
      * Update.
      *
-     * @param id                      the id
+     * @param id                     the id
      * @param productCreationRequest the product creattion request
      */
     public void update(Long id, @Valid ProductCreationRequest productCreationRequest) {

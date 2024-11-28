@@ -1,6 +1,5 @@
-package com.shopbee.productservice.service.user;
+package com.shopbee.productservice.shared.external.user;
 
-import io.quarkus.security.Authenticated;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;

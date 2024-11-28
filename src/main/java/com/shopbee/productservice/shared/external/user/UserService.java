@@ -1,4 +1,4 @@
-package com.shopbee.productservice.service.user;
+package com.shopbee.productservice.shared.external.user;
 
 import com.shopbee.productservice.exception.ProductServiceException;
 import jakarta.enterprise.context.ApplicationScoped;
