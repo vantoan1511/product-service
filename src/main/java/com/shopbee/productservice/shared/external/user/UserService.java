@@ -4,7 +4,6 @@ import com.shopbee.productservice.exception.ProductServiceException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.slf4j.Logger;
@@ -17,16 +16,15 @@ import java.util.Optional;
 public class UserService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
-    private static final String BEARER = "Bearer ";
-
-    @RestClient
-    UserResource userResource;
+    private final UserServiceClient userServiceClient;
 
     @Inject
-    JsonWebToken jsonWebToken;
+    public UserService(@RestClient UserServiceClient userServiceClient) {
+        this.userServiceClient = userServiceClient;
+    }
 
     public User getByUsername(String username) {
-        try (Response response = userResource.search(username, getBearerToken())) {
+        try (Response response = userServiceClient.search(username)) {
             PagedResponse pagedResponse = response.readEntity(PagedResponse.class);
             return Optional.ofNullable(pagedResponse.getItems())
                     .map(List::getFirst)
@@ -35,22 +33,5 @@ public class UserService {
             LOG.error("Get user by username failed: {}", e.getLocalizedMessage());
             throw new ProductServiceException("An error occurred when calling user service", Response.Status.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    public User getById(Long id) {
-        try (Response response = userResource.getById(id, getBearerToken())) {
-            return response.readEntity(User.class);
-        } catch (ClientWebApplicationException e) {
-            LOG.error("Get user by id failed: {}", e.getLocalizedMessage());
-            throw new ProductServiceException("An error occurred when calling user service", Response.Status.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    private String getBearerToken() {
-        return BEARER + getRawToken();
-    }
-
-    private String getRawToken() {
-        return jsonWebToken.getRawToken();
     }
 }
