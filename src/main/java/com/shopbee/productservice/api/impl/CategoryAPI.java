@@ -1,4 +1,4 @@
-package com.shopbee.productservice.api;
+package com.shopbee.productservice.api.impl;
 
 import com.shopbee.productservice.dto.CategoryCreationRequest;
 import com.shopbee.productservice.dto.PageRequest;
