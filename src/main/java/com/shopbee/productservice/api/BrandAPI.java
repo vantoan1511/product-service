@@ -1,4 +1,4 @@
-package com.shopbee.productservice.resource;
+package com.shopbee.productservice.api;
 
 import com.shopbee.productservice.dto.BrandCreationRequest;
 import com.shopbee.productservice.dto.PageRequest;
@@ -19,11 +19,11 @@ import java.util.List;
 @Path("brands")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class BrandResource {
+public class BrandAPI {
 
     BrandService brandService;
 
-    public BrandResource(BrandService brandService) {
+    public BrandAPI(BrandService brandService) {
         this.brandService = brandService;
     }
 

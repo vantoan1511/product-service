@@ -2,15 +2,15 @@ package com.shopbee.productservice.dto;
 
 import jakarta.ws.rs.QueryParam;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class FilterCriteria {
@@ -34,5 +34,6 @@ public class FilterCriteria {
     private Boolean active;
 
     private List<String> brands;
+    private List<String> models;
     private List<String> categories;
 }

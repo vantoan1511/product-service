@@ -1,4 +1,4 @@
-package com.shopbee.productservice.resource;
+package com.shopbee.productservice.api;
 
 import com.shopbee.productservice.dto.ModelCreationRequest;
 import com.shopbee.productservice.dto.PageRequest;
@@ -19,11 +19,11 @@ import java.util.List;
 @Path("models")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ModelResource {
+public class ModelAPI {
 
     ModelService modelService;
 
-    public ModelResource(ModelService modelService) {
+    public ModelAPI(ModelService modelService) {
         this.modelService = modelService;
     }
 

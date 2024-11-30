@@ -39,6 +39,7 @@ public class ProductRepository extends AbstractRepository implements PanacheRepo
     private QueryBuilder queryBuilder(FilterCriteria filterCriteria) {
         QueryBuilder queryBuilder = new QueryBuilder();
         queryBuilder.addInCondition("model.brand.slug", filterCriteria.getBrands());
+        queryBuilder.addInCondition("model.slug", filterCriteria.getModels());
         queryBuilder.addInCondition("category.slug", filterCriteria.getCategories());
         queryBuilder.addGreaterThanOrEqualCondition("salePrice", filterCriteria.getMinPrice());
         queryBuilder.addLessThanOrEqualCondition("salePrice", filterCriteria.getMaxPrice());

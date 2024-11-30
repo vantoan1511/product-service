@@ -1,4 +1,4 @@
-package com.shopbee.productservice.resource;
+package com.shopbee.productservice.api;
 
 import com.shopbee.productservice.dto.CategoryCreationRequest;
 import com.shopbee.productservice.dto.PageRequest;
@@ -19,11 +19,11 @@ import java.util.List;
 @Path("categories")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class CategoryResource {
+public class CategoryAPI {
 
     CategoryService categoryService;
 
-    public CategoryResource(CategoryService categoryService) {
+    public CategoryAPI(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 

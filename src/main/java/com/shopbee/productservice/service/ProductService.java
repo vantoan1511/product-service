@@ -1,11 +1,15 @@
 package com.shopbee.productservice.service;
 
 import com.shopbee.productservice.dto.*;
+import com.shopbee.productservice.entity.Brand;
 import com.shopbee.productservice.entity.Category;
 import com.shopbee.productservice.entity.Model;
 import com.shopbee.productservice.entity.Product;
 import com.shopbee.productservice.exception.ProductServiceException;
 import com.shopbee.productservice.mapper.ProductMapper;
+import com.shopbee.productservice.repository.BrandRepository;
+import com.shopbee.productservice.repository.CategoryRepository;
+import com.shopbee.productservice.repository.ModelRepository;
 import com.shopbee.productservice.repository.ProductRepository;
 import com.shopbee.productservice.shared.converter.impl.ProductConverter;
 import com.shopbee.productservice.shared.external.review.ReviewServiceClient;
@@ -18,10 +22,12 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.map.HashedMap;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -34,6 +40,9 @@ public class ProductService {
 
     private final ProductConverter productConverter;
     private final ReviewServiceClient reviewServiceClient;
+    private final BrandRepository brandRepository;
+    private final ModelRepository modelRepository;
+    private final CategoryRepository categoryRepository;
     ModelService modelService;
     CategoryService categoryService;
     ProductRepository productRepository;
@@ -53,6 +62,9 @@ public class ProductService {
      */
     public ProductService(ProductConverter productConverter,
                           @RestClient ReviewServiceClient reviewServiceClient,
+                          BrandRepository brandRepository,
+                          ModelRepository modelRepository,
+                          CategoryRepository categoryRepository,
                           ModelService modelService,
                           CategoryService categoryService,
                           ProductRepository productRepository,
@@ -61,6 +73,9 @@ public class ProductService {
                           SecurityIdentity identity) {
         this.productConverter = productConverter;
         this.reviewServiceClient = reviewServiceClient;
+        this.brandRepository = brandRepository;
+        this.modelRepository = modelRepository;
+        this.categoryRepository = categoryRepository;
         this.modelService = modelService;
         this.categoryService = categoryService;
         this.productRepository = productRepository;
@@ -198,6 +213,45 @@ public class ProductService {
         product.setWarranty(productCreationRequest.getWarranty());
         product.setModel(model);
         product.setCategory(category);
+    }
+
+    public ProductStatistic getProductStatistic() {
+        long totalProducts = productRepository.count();
+        FilterCriteria activeFilter = new FilterCriteria();
+        activeFilter.setActive(true);
+        long totalActiveProducts = productRepository.count(activeFilter);
+
+        List<Brand> brands = brandRepository.listAll();
+        Map<String, Long> productsByBrand = new HashedMap<>();
+        brands.forEach(brand -> {
+            FilterCriteria brandFilter = FilterCriteria.builder().brands(List.of(brand.getSlug())).build();
+            long totalByBrand = productRepository.count(brandFilter);
+            productsByBrand.put(brand.getSlug(), totalByBrand);
+        });
+
+        List<Model> models = modelRepository.listAll();
+        Map<String, Long> productsByModel = new HashedMap<>();
+        models.forEach(model -> {
+            FilterCriteria modelFilter = FilterCriteria.builder().models(List.of(model.getSlug())).build();
+            long totalByModel = productRepository.count(modelFilter);
+            productsByModel.put(model.getSlug(), totalByModel);
+        });
+
+        List<Category> categories = categoryRepository.listAll();
+        Map<String, Long> productsByCategory = new HashedMap<>();
+        categories.forEach(category -> {
+            FilterCriteria categoryFilter = FilterCriteria.builder().categories(List.of(category.getSlug())).build();
+            long totalByCategory = productRepository.count(categoryFilter);
+            productsByCategory.put(category.getSlug(), totalByCategory);
+        });
+
+        return ProductStatistic.builder()
+                .totalProducts(totalProducts)
+                .totalActiveProducts(totalActiveProducts)
+                .totalProductsByBrand(productsByBrand)
+                .totalProductsByModel(productsByModel)
+                .totalProductsByCategory(productsByCategory)
+                .build();
     }
 
     /**

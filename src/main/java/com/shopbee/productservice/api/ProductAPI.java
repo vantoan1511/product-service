@@ -1,70 +1,63 @@
-package com.shopbee.productservice.resource;
+package com.shopbee.productservice.api;
 
 import com.shopbee.productservice.dto.*;
 import com.shopbee.productservice.entity.Product;
-import com.shopbee.productservice.security.constant.Role;
 import com.shopbee.productservice.service.ProductImageService;
 import com.shopbee.productservice.service.ProductService;
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.*;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BeanParam;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.List;
 
-@Path("products")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-public class ProductResource {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ProductResource.class);
-
-    @ConfigProperty(name = "API_KEY")
-    private String secretAPIKey;
+public class ProductAPI implements IProductAPI {
 
     private final ProductService productService;
     private final ProductImageService productImageService;
 
-    public ProductResource(ProductService productService,
-                           ProductImageService productImageService) {
+    @ConfigProperty(name = "API_KEY")
+    private String secretAPIKey;
+
+    @Inject
+    public ProductAPI(ProductService productService,
+                      ProductImageService productImageService) {
         this.productService = productService;
         this.productImageService = productImageService;
     }
 
-    @GET
+    @Override
     public Response getByCriteria(@BeanParam FilterCriteria filterCriteria,
                                   @BeanParam SortCriteria sortCriteria,
                                   @BeanParam PageRequest pageRequest) {
         return Response.ok(productService.getByCriteria(filterCriteria, sortCriteria, pageRequest)).build();
     }
 
-    @GET
-    @Path("{slug}")
+    @Override
     public Response getBySlug(@PathParam("slug") String slug) {
         productService.increaseView(slug);
         return Response.ok(productService.getBySlug(slug)).build();
     }
 
-    @POST
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @Override
     public Response create(ProductCreationRequest productCreationRequest, @Context UriInfo uriInfo) {
         Product product = productService.create(productCreationRequest);
         URI uri = uriInfo.getAbsolutePathBuilder().path(product.getSlug()).build();
         return Response.created(uri).entity(product).build();
     }
 
-    @PUT
-    @Path("{id}")
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @Override
     public Response update(@PathParam("id") Long id, ProductCreationRequest productCreationRequest) {
         productService.update(id, productCreationRequest);
         return Response.ok().build();
     }
 
-    @PATCH
+    @Override
     public Response updateQuantity(@HeaderParam(value = "API_KEY") String apiKey,
                                    ProductQuantityRequest productQuantityRequest) {
         if (!secretAPIKey.equals(apiKey)) {
@@ -75,40 +68,37 @@ public class ProductResource {
         return Response.ok().build();
     }
 
-    @DELETE
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @Override
     public Response delete(List<Long> ids) {
         productService.delete(ids);
         return Response.noContent().build();
     }
 
-    @GET
-    @Path("{id}/images")
+    @Override
     public Response getImages(@PathParam("id") Long id) {
         return Response.ok(productImageService.getProductImages(id)).build();
     }
 
-    @PUT
-    @Path("{id}/images")
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @Override
     public Response updateImages(@PathParam("id") Long id, List<Long> imageIds) {
         productImageService.updateImages(id, imageIds);
         return Response.ok().build();
     }
 
-    @PATCH
-    @Path("{id}/images/{imageId}")
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @Override
     public Response setFeaturedImage(@PathParam("id") Long productId, Long imageId) {
         productImageService.setFeaturedImage(productId, imageId);
         return Response.ok().build();
     }
 
-    @DELETE
-    @Path("{id}/images")
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @Override
     public Response removeImages(@PathParam("id") Long id, List<Long> imageIds) {
         productImageService.removeImages(id, imageIds);
         return Response.noContent().build();
+    }
+
+    @Override
+    public Response getStatistic() {
+        return Response.ok(productService.getProductStatistic()).build();
     }
 }
