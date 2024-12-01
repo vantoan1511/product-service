@@ -2,6 +2,7 @@ package com.shopbee.productservice.api;
 
 import com.shopbee.productservice.dto.*;
 import com.shopbee.productservice.security.constant.Role;
+import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -64,4 +65,9 @@ public interface IProductAPI {
     @GET
     @Path("statistic")
     Response getStatistic();
+
+    @GET
+    @Path("recommendations")
+    @Authenticated
+    Response getRecommendations();
 }

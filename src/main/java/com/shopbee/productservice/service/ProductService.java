@@ -12,6 +12,12 @@ import com.shopbee.productservice.repository.CategoryRepository;
 import com.shopbee.productservice.repository.ModelRepository;
 import com.shopbee.productservice.repository.ProductRepository;
 import com.shopbee.productservice.shared.converter.impl.ProductConverter;
+import com.shopbee.productservice.shared.external.cart.Cart;
+import com.shopbee.productservice.shared.external.cart.CartServiceClient;
+import com.shopbee.productservice.shared.external.recommendation.Behavior;
+import com.shopbee.productservice.shared.external.recommendation.GetEvaluateResponse;
+import com.shopbee.productservice.shared.external.recommendation.GetRecommendedProductsRequest;
+import com.shopbee.productservice.shared.external.recommendation.RecommendationServiceClient;
 import com.shopbee.productservice.shared.external.review.ReviewServiceClient;
 import com.shopbee.productservice.shared.external.review.ReviewStatistic;
 import com.shopbee.productservice.shared.external.user.User;
@@ -26,9 +32,7 @@ import org.apache.commons.collections4.map.HashedMap;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * The type Product service.
@@ -40,28 +44,37 @@ public class ProductService {
 
     private final ProductConverter productConverter;
     private final ReviewServiceClient reviewServiceClient;
+    private final CartServiceClient cartServiceClient;
+    private final RecommendationServiceClient recommendationServiceClient;
     private final BrandRepository brandRepository;
     private final ModelRepository modelRepository;
     private final CategoryRepository categoryRepository;
-    ModelService modelService;
-    CategoryService categoryService;
-    ProductRepository productRepository;
-    ProductMapper productMapper;
-    UserService userService;
-    SecurityIdentity identity;
+    private final ModelService modelService;
+    private final CategoryService categoryService;
+    private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
+    private final UserService userService;
+    private final SecurityIdentity identity;
 
     /**
      * Instantiates a new Product service.
      *
-     * @param modelService      the model service
-     * @param categoryService   the category service
-     * @param productRepository the product repository
-     * @param productMapper     the product mapper
-     * @param userService       the user service
-     * @param identity          the identity
+     * @param productConverter    the product converter
+     * @param reviewServiceClient the review service client
+     * @param brandRepository     the brand repository
+     * @param modelRepository     the model repository
+     * @param categoryRepository  the category repository
+     * @param modelService        the model service
+     * @param categoryService     the category service
+     * @param productRepository   the product repository
+     * @param productMapper       the product mapper
+     * @param userService         the user service
+     * @param identity            the identity
      */
     public ProductService(ProductConverter productConverter,
                           @RestClient ReviewServiceClient reviewServiceClient,
+                          @RestClient CartServiceClient cartServiceClient,
+                          @RestClient RecommendationServiceClient recommendationServiceClient,
                           BrandRepository brandRepository,
                           ModelRepository modelRepository,
                           CategoryRepository categoryRepository,
@@ -73,6 +86,8 @@ public class ProductService {
                           SecurityIdentity identity) {
         this.productConverter = productConverter;
         this.reviewServiceClient = reviewServiceClient;
+        this.cartServiceClient = cartServiceClient;
+        this.recommendationServiceClient = recommendationServiceClient;
         this.brandRepository = brandRepository;
         this.modelRepository = modelRepository;
         this.categoryRepository = categoryRepository;
@@ -82,6 +97,40 @@ public class ProductService {
         this.productMapper = productMapper;
         this.userService = userService;
         this.identity = identity;
+    }
+
+    /**
+     * Gets recommendations.
+     *
+     * @return the recommendations
+     */
+    public List<ProductResponse> getRecommendations() {
+        List<Product> activeProducts = getAllActive();
+
+        List<Long> inCarts = getInCartProductIds();
+        Behavior behavior = Behavior.builder()
+                .favourites(Collections.emptyList())
+                .inCart(inCarts)
+                .recentVisits(Collections.emptyList())
+                .build();
+        GetRecommendedProductsRequest getRecommendedProductsRequest =
+                GetRecommendedProductsRequest.builder()
+                        .behavior(behavior)
+                        .availableProducts(activeProducts)
+                        .build();
+        GetEvaluateResponse evaluateResponse = recommendationServiceClient.evaluate(getRecommendedProductsRequest);
+
+        return evaluateResponse.getRecommendations();
+    }
+
+    /**
+     * Gets all active.
+     *
+     * @return the all active
+     */
+    public List<Product> getAllActive() {
+        FilterCriteria activeFilter = FilterCriteria.builder().active(true).build();
+        return productRepository.findByCriteria(activeFilter);
     }
 
     /**
@@ -130,14 +179,7 @@ public class ProductService {
     public ProductResponse getBySlug(String slug) {
         Product product = productRepository.findBySlug(slug)
                 .orElseThrow(() -> new ProductServiceException("Product not found", Response.Status.NOT_FOUND));
-        ProductResponse response = productConverter.convert(product);
-        try {
-            ReviewStatistic statistic = reviewServiceClient.getStatistic(slug);
-            response.setRating(statistic.getAverageRating());
-        } catch (Exception e) {
-            log.warn("Failed to get rating.");
-        }
-        return response;
+        return toProductResponse(product);
     }
 
     /**
@@ -215,6 +257,11 @@ public class ProductService {
         product.setCategory(category);
     }
 
+    /**
+     * Gets product statistic.
+     *
+     * @return the product statistic
+     */
     public ProductStatistic getProductStatistic() {
         long totalProducts = productRepository.count();
         FilterCriteria activeFilter = new FilterCriteria();
@@ -271,6 +318,38 @@ public class ProductService {
      */
     public void delete(List<Long> ids) {
         ids.forEach(this::delete);
+    }
+
+    private List<Long> getInCartProductIds() {
+        PageRequest pageRequest = PageRequest.builder().size(Integer.MAX_VALUE).build();
+
+        PagedResponse<Cart> cartPagedResponse = cartServiceClient.getCurrent(pageRequest);
+        List<Cart> carts = Optional.ofNullable(cartPagedResponse).map(PagedResponse::getItems).orElse(Collections.emptyList());
+        List<String> productSlug = carts.stream().map(Cart::getProductSlug).toList();
+        List<Product> products = productSlug.stream().map(slug -> productRepository.findBySlug(slug).orElse(null)).toList();
+
+        return products.stream().filter(Objects::nonNull).map(Product::getId).toList();
+    }
+
+    /**
+     * Convert from product product response.
+     *
+     * @param product the product
+     * @return the product response
+     */
+    private ProductResponse toProductResponse(Product product) {
+        if (Objects.isNull(product)) {
+            return null;
+        }
+
+        ProductResponse response = productConverter.convert(product);
+        try {
+            ReviewStatistic statistic = reviewServiceClient.getStatistic(product.getSlug());
+            response.setRating(statistic.getAverageRating());
+        } catch (Exception e) {
+            log.warn("Failed to get rating.");
+        }
+        return response;
     }
 
     /**

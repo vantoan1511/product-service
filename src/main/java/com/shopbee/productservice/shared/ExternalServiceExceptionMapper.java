@@ -2,11 +2,9 @@ package com.shopbee.productservice.shared;
 
 import com.shopbee.productservice.exception.ProductServiceException;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.Provider;
 import org.eclipse.microprofile.rest.client.ext.ResponseExceptionMapper;
 
-@Provider
-public class ExternalServiceExceptionMapper implements ResponseExceptionMapper<ProductServiceException> {
+public class ExternalServiceExceptionMapper implements ResponseExceptionMapper<RuntimeException> {
 
     @Override
     public ProductServiceException toThrowable(Response response) {
@@ -14,6 +12,6 @@ public class ExternalServiceExceptionMapper implements ResponseExceptionMapper<P
         if (Response.Status.Family.SUCCESSFUL.equals(family)) {
             return null;
         }
-        return new ProductServiceException("Failed to call external service.", Response.Status.SERVICE_UNAVAILABLE);
+        return new ProductServiceException(response.getEntity(), Response.Status.SERVICE_UNAVAILABLE);
     }
 }

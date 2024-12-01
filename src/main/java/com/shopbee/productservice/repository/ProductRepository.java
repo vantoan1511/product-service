@@ -31,6 +31,12 @@ public class ProductRepository extends AbstractRepository implements PanacheRepo
         return query.list();
     }
 
+    public List<Product> findByCriteria(FilterCriteria filterCriteria) {
+        QueryBuilder queryBuilder = queryBuilder(filterCriteria);
+        PanacheQuery<Product> query = find(queryBuilder.getQueryString(), queryBuilder.getParameters());
+        return query.list();
+    }
+
     public long count(FilterCriteria filterCriteria) {
         QueryBuilder queryBuilder = queryBuilder(filterCriteria);
         return count(queryBuilder.getQueryString(), queryBuilder.getParameters());

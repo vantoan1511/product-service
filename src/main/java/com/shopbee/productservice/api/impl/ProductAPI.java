@@ -102,4 +102,9 @@ public class ProductAPI implements IProductAPI {
     public Response getStatistic() {
         return Response.ok(productService.getProductStatistic()).build();
     }
+
+    @Override
+    public Response getRecommendations() {
+        return Response.ok(productService.getRecommendations()).build();
+    }
 }
