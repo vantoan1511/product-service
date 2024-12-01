@@ -14,10 +14,7 @@ import com.shopbee.productservice.repository.ProductRepository;
 import com.shopbee.productservice.shared.converter.impl.ProductConverter;
 import com.shopbee.productservice.shared.external.cart.Cart;
 import com.shopbee.productservice.shared.external.cart.CartServiceClient;
-import com.shopbee.productservice.shared.external.recommendation.Behavior;
-import com.shopbee.productservice.shared.external.recommendation.GetEvaluateResponse;
-import com.shopbee.productservice.shared.external.recommendation.GetRecommendedProductsRequest;
-import com.shopbee.productservice.shared.external.recommendation.RecommendationServiceClient;
+import com.shopbee.productservice.shared.external.recommendation.*;
 import com.shopbee.productservice.shared.external.review.ReviewServiceClient;
 import com.shopbee.productservice.shared.external.review.ReviewStatistic;
 import com.shopbee.productservice.shared.external.user.User;
@@ -33,6 +30,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The type Product service.
@@ -59,17 +57,19 @@ public class ProductService {
     /**
      * Instantiates a new Product service.
      *
-     * @param productConverter    the product converter
-     * @param reviewServiceClient the review service client
-     * @param brandRepository     the brand repository
-     * @param modelRepository     the model repository
-     * @param categoryRepository  the category repository
-     * @param modelService        the model service
-     * @param categoryService     the category service
-     * @param productRepository   the product repository
-     * @param productMapper       the product mapper
-     * @param userService         the user service
-     * @param identity            the identity
+     * @param productConverter            the product converter
+     * @param reviewServiceClient         the review service client
+     * @param cartServiceClient           the cart service client
+     * @param recommendationServiceClient the recommendation service client
+     * @param brandRepository             the brand repository
+     * @param modelRepository             the model repository
+     * @param categoryRepository          the category repository
+     * @param modelService                the model service
+     * @param categoryService             the category service
+     * @param productRepository           the product repository
+     * @param productMapper               the product mapper
+     * @param userService                 the user service
+     * @param identity                    the identity
      */
     public ProductService(ProductConverter productConverter,
                           @RestClient ReviewServiceClient reviewServiceClient,
@@ -105,7 +105,7 @@ public class ProductService {
      * @return the recommendations
      */
     public List<ProductResponse> getRecommendations() {
-        List<Product> activeProducts = getAllActive();
+        List<ProductResponse> activeProducts = getAllActive().stream().map(this::toProductResponse).toList();
 
         List<Long> inCarts = getInCartProductIds();
         Behavior behavior = Behavior.builder()
@@ -118,9 +118,11 @@ public class ProductService {
                         .behavior(behavior)
                         .availableProducts(activeProducts)
                         .build();
-        GetEvaluateResponse evaluateResponse = recommendationServiceClient.evaluate(getRecommendedProductsRequest);
+        GetRecommendationResponse evaluateResponse = recommendationServiceClient.getRecommendations(getRecommendedProductsRequest);
+        List<Long> recommendationIds = evaluateResponse.getRecommendations().stream().map(EvaluatedProduct::getId).toList();
+        Map<Long, ProductResponse> productMap = activeProducts.stream().collect(Collectors.toMap(ProductResponse::getId, product -> product));
 
-        return evaluateResponse.getRecommendations();
+        return recommendationIds.stream().map(productMap::get).toList();
     }
 
     /**
@@ -320,6 +322,11 @@ public class ProductService {
         ids.forEach(this::delete);
     }
 
+    /**
+     * Gets in cart product ids.
+     *
+     * @return the in cart product ids
+     */
     private List<Long> getInCartProductIds() {
         PageRequest pageRequest = PageRequest.builder().size(Integer.MAX_VALUE).build();
 

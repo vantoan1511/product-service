@@ -1,6 +1,5 @@
 package com.shopbee.productservice.shared.external.recommendation;
 
-import com.shopbee.productservice.dto.ProductResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +11,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetEvaluateResponse {
-    private List<ProductResponse> recommendations;
+public class GetRecommendationResponse {
+    private List<EvaluatedProduct> recommendations;
 }

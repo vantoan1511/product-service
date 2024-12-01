@@ -2,13 +2,16 @@ package com.shopbee.productservice.shared.external.recommendation;
 
 import com.shopbee.productservice.shared.Constant;
 import com.shopbee.productservice.shared.ExternalServiceExceptionMapper;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-@Path("evaluate")
+@Path("recommendations")
 @RegisterRestClient(configKey = Constant.RECOMMENDATION_SERVICE_CLIENT)
 @RegisterClientHeaders
 @Produces(MediaType.APPLICATION_JSON)
@@ -17,5 +20,5 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 public interface RecommendationServiceClient {
 
     @POST
-    GetEvaluateResponse evaluate(GetRecommendedProductsRequest getRecommendedProductsRequest);
+    GetRecommendationResponse getRecommendations(GetRecommendedProductsRequest getRecommendedProductsRequest);
 }
