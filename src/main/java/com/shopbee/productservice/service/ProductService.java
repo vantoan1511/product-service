@@ -143,9 +143,9 @@ public class ProductService {
      * @param pageRequest    the page request
      * @return the by criteria
      */
-    public PagedResponse<Product> getByCriteria(@Valid FilterCriteria filterCriteria,
-                                                @Valid SortCriteria sortCriteria,
-                                                @Valid PageRequest pageRequest) {
+    public PagedResponse<ProductResponse> getByCriteria(@Valid FilterCriteria filterCriteria,
+                                                        @Valid SortCriteria sortCriteria,
+                                                        @Valid PageRequest pageRequest) {
         if (Optional.ofNullable(filterCriteria.getBrandListString()).isPresent()) {
             List<String> brands = List.of(filterCriteria.getBrandListString().split(","));
             filterCriteria.setBrands(brands);
@@ -155,8 +155,8 @@ public class ProductService {
             filterCriteria.setCategories(categories);
         }
 
-        List<Product> pagedProducts =
-                productRepository.findByCriteria(filterCriteria, sortCriteria, pageRequest);
+        List<ProductResponse> pagedProducts =
+                productRepository.findByCriteria(filterCriteria, sortCriteria, pageRequest).stream().map(this::toProductResponse).toList();
         long totalProducts = productRepository.count(filterCriteria);
         return PagedResponse.from(totalProducts, pageRequest, pagedProducts);
     }
