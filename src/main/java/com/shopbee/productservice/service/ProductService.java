@@ -105,24 +105,20 @@ public class ProductService {
      * @return the recommendations
      */
     public List<ProductResponse> getRecommendations() {
-        List<ProductResponse> activeProducts = getAllActive().stream().map(this::toProductResponse).toList();
+        List<Product> activeProducts = getAllActive();
+        Map<Long, Product> productMap = activeProducts.stream().collect(Collectors.toMap(Product::getId, product -> product));
+        Map<String, Product> productSlugMap = activeProducts.stream().collect(Collectors.toMap(Product::getSlug, product -> product));
 
-        List<Long> inCarts = getInCartProductIds();
-        Behavior behavior = Behavior.builder()
-                .favourites(Collections.emptyList())
-                .inCart(inCarts)
-                .recentVisits(Collections.emptyList())
-                .build();
+        List<Long> inCarts = getInCartProductSlugs().stream().map(productSlugMap::get).map(Product::getId).toList();
+        Behavior behavior =
+                Behavior.builder().favourites(Collections.emptyList()).inCart(inCarts).recentVisits(Collections.emptyList()).build();
         GetRecommendedProductsRequest getRecommendedProductsRequest =
-                GetRecommendedProductsRequest.builder()
-                        .behavior(behavior)
-                        .availableProducts(activeProducts)
-                        .build();
-        GetRecommendationResponse evaluateResponse = recommendationServiceClient.getRecommendations(getRecommendedProductsRequest);
-        List<Long> recommendationIds = evaluateResponse.getRecommendations().stream().map(EvaluatedProduct::getId).toList();
-        Map<Long, ProductResponse> productMap = activeProducts.stream().collect(Collectors.toMap(ProductResponse::getId, product -> product));
+                GetRecommendedProductsRequest.builder().behavior(behavior).availableProducts(activeProducts).build();
+        GetRecommendationResponse evaluateResponse =
+                recommendationServiceClient.getRecommendations(getRecommendedProductsRequest);
+        List<Long> recommendationIds = evaluateResponse.getRecommendations().stream().map(EvaluatedProduct::getId).limit(10).toList();
 
-        return recommendationIds.stream().map(productMap::get).toList();
+        return recommendationIds.stream().map(productMap::get).map(this::toProductResponse).toList();
     }
 
     /**
@@ -219,6 +215,21 @@ public class ProductService {
 
         productRepository.persist(product);
         return product;
+    }
+
+    /**
+     * Update partially.
+     *
+     * @param productId                   the product id
+     * @param updatePartialProductRequest the update partial product request
+     */
+    public void updatePartially(Long productId, UpdatePartialProductRequest updatePartialProductRequest) {
+        Product product = productRepository.findById(productId);
+        if (Objects.isNull(product)) {
+            throw new ProductServiceException("Product not found " + productId, Response.Status.NOT_FOUND);
+        }
+
+        product.setStockQuantity(updatePartialProductRequest.getStockQuantity());
     }
 
     /**
@@ -336,6 +347,23 @@ public class ProductService {
         List<Product> products = productSlug.stream().map(slug -> productRepository.findBySlug(slug).orElse(null)).toList();
 
         return products.stream().filter(Objects::nonNull).map(Product::getId).toList();
+    }
+
+    /**
+     * Gets in cart product slugs.
+     *
+     * @return the in cart product slugs
+     */
+    private List<String> getInCartProductSlugs() {
+        try {
+            PageRequest pageRequest = PageRequest.builder().size(Integer.MAX_VALUE).build();
+            PagedResponse<Cart> cartPagedResponse = cartServiceClient.getCurrent(pageRequest);
+            List<Cart> carts = Optional.ofNullable(cartPagedResponse).map(PagedResponse::getItems).orElse(Collections.emptyList());
+            return carts.stream().map(Cart::getProductSlug).toList();
+        } catch (Exception e) {
+            log.warn("Failed to get cart {0}", e);
+        }
+        return Collections.emptyList();
     }
 
     /**

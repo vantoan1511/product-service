@@ -1,6 +1,6 @@
 package com.shopbee.productservice.shared.external.recommendation;
 
-import com.shopbee.productservice.dto.ProductResponse;
+import com.shopbee.productservice.entity.Product;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,5 +15,5 @@ import java.util.List;
 public class GetRecommendedProductsRequest {
 
     private Behavior behavior;
-    private List<ProductResponse> availableProducts;
+    private List<Product> availableProducts;
 }

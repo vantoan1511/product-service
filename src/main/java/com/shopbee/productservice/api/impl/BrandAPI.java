@@ -40,7 +40,7 @@ public class BrandAPI {
     }
 
     @POST
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @RolesAllowed({Role.ROLE_ADMIN, Role.ROLE_STAFF})
     public Response create(BrandCreationRequest brandCreationRequest, @Context UriInfo uriInfo) {
         Brand brand = brandService.create(brandCreationRequest);
         URI uri = uriInfo.getAbsolutePathBuilder().path(brand.getSlug()).build();
@@ -49,14 +49,14 @@ public class BrandAPI {
 
     @PUT
     @Path("{id}")
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @RolesAllowed({Role.ROLE_ADMIN, Role.ROLE_STAFF})
     public Response update(@PathParam("id") Long id, BrandCreationRequest brandCreationRequest) {
         brandService.update(id, brandCreationRequest);
         return Response.ok().build();
     }
 
     @DELETE
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @RolesAllowed({Role.ROLE_ADMIN, Role.ROLE_STAFF})
     public Response delete(List<Long> ids) {
         brandService.delete(ids);
         return Response.noContent().build();

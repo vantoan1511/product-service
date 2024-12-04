@@ -59,6 +59,12 @@ public class ProductAPI implements IProductAPI {
     }
 
     @Override
+    public Response updatePartially(Long id, UpdatePartialProductRequest updatePartialProductRequest) {
+        productService.updatePartially(id, updatePartialProductRequest);
+        return Response.ok().build();
+    }
+
+    @Override
     public Response updateQuantity(@HeaderParam(value = "API_KEY") String apiKey,
                                    ProductQuantityRequest productQuantityRequest) {
         if (!secretAPIKey.equals(apiKey)) {

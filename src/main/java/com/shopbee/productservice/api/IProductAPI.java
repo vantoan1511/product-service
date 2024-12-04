@@ -4,6 +4,8 @@ import com.shopbee.productservice.dto.*;
 import com.shopbee.productservice.security.constant.Role;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -43,6 +45,11 @@ public interface IProductAPI {
     @RolesAllowed({Role.ROLE_ADMIN, Role.ROLE_STAFF})
     Response update(@PathParam("id") Long id, ProductCreationRequest productCreationRequest);
 
+    @PATCH
+    @Path("{id}")
+    @Authenticated
+    Response updatePartially(@PathParam("id") Long id, @Valid @NotNull UpdatePartialProductRequest updatePartialProductRequest);
+
     @GET
     @Path("{id}/images")
     Response getImages(@PathParam("id") Long id);
@@ -68,6 +75,5 @@ public interface IProductAPI {
 
     @GET
     @Path("recommendations")
-    @Authenticated
     Response getRecommendations();
 }

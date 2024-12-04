@@ -40,7 +40,7 @@ public class ModelAPI {
     }
 
     @POST
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @RolesAllowed({Role.ROLE_ADMIN, Role.ROLE_STAFF})
     public Response create(ModelCreationRequest modelCreationRequest, @Context UriInfo uriInfo) {
         Model model = modelService.create(modelCreationRequest);
         URI uri = uriInfo.getAbsolutePathBuilder().path(model.getSlug()).build();
@@ -49,14 +49,14 @@ public class ModelAPI {
 
     @PUT
     @Path("{id}")
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @RolesAllowed({Role.ROLE_ADMIN, Role.ROLE_STAFF})
     public Response update(@PathParam("id") Long id, ModelCreationRequest modelCreationRequest) {
         modelService.update(id, modelCreationRequest);
         return Response.ok().build();
     }
 
     @DELETE
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @RolesAllowed({Role.ROLE_ADMIN, Role.ROLE_STAFF})
     public Response delete(List<Long> ids) {
         modelService.delete(ids);
         return Response.noContent().build();

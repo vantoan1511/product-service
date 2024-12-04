@@ -40,7 +40,7 @@ public class CategoryAPI {
     }
 
     @POST
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @RolesAllowed({Role.ROLE_ADMIN, Role.ROLE_STAFF})
     public Response create(CategoryCreationRequest categoryCreationRequest, @Context UriInfo uriInfo) {
         Category category = categoryService.create(categoryCreationRequest);
         URI uri = uriInfo.getAbsolutePathBuilder().path(category.getSlug()).build();
@@ -49,14 +49,14 @@ public class CategoryAPI {
 
     @PUT
     @Path("{id}")
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @RolesAllowed({Role.ROLE_ADMIN, Role.ROLE_STAFF})
     public Response update(@PathParam("id") Long id, CategoryCreationRequest categoryCreationRequest) {
         categoryService.update(id, categoryCreationRequest);
         return Response.ok().build();
     }
 
     @DELETE
-    @RolesAllowed({Role.ROLE_ADMIN})
+    @RolesAllowed({Role.ROLE_ADMIN, Role.ROLE_STAFF})
     public Response delete(List<Long> ids) {
         categoryService.delete(ids);
         return Response.noContent().build();
