@@ -59,8 +59,8 @@ public class ProductAPI implements IProductAPI {
     }
 
     @Override
-    public Response updatePartially(Long id, UpdatePartialProductRequest updatePartialProductRequest) {
-        productService.updatePartially(id, updatePartialProductRequest);
+    public Response updatePartially(String productSlug, UpdatePartialProductRequest updatePartialProductRequest) {
+        productService.updatePartially(productSlug, updatePartialProductRequest);
         return Response.ok().build();
     }
 

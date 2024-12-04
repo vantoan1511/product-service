@@ -220,15 +220,12 @@ public class ProductService {
     /**
      * Update partially.
      *
-     * @param productId                   the product id
+     * @param productSlug                 the product id
      * @param updatePartialProductRequest the update partial product request
      */
-    public void updatePartially(Long productId, UpdatePartialProductRequest updatePartialProductRequest) {
-        Product product = productRepository.findById(productId);
-        if (Objects.isNull(product)) {
-            throw new ProductServiceException("Product not found " + productId, Response.Status.NOT_FOUND);
-        }
-
+    public void updatePartially(String productSlug, UpdatePartialProductRequest updatePartialProductRequest) {
+        Product product = productRepository.findBySlug(productSlug)
+                .orElseThrow(() -> new ProductServiceException("Product not found " + productSlug, Response.Status.NOT_FOUND));
         product.setStockQuantity(updatePartialProductRequest.getStockQuantity());
     }
 

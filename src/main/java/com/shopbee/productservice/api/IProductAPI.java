@@ -40,15 +40,15 @@ public interface IProductAPI {
     @Path("{slug}")
     Response getBySlug(@PathParam("slug") String slug);
 
+    @PATCH
+    @Path("{slug}")
+    @Authenticated
+    Response updatePartially(@PathParam("slug") String productSlug, @Valid @NotNull UpdatePartialProductRequest updatePartialProductRequest);
+
     @PUT
     @Path("{id}")
     @RolesAllowed({Role.ROLE_ADMIN, Role.ROLE_STAFF})
     Response update(@PathParam("id") Long id, ProductCreationRequest productCreationRequest);
-
-    @PATCH
-    @Path("{id}")
-    @Authenticated
-    Response updatePartially(@PathParam("id") Long id, @Valid @NotNull UpdatePartialProductRequest updatePartialProductRequest);
 
     @GET
     @Path("{id}/images")
