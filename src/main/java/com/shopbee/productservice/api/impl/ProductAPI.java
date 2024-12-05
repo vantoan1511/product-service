@@ -65,6 +65,16 @@ public class ProductAPI implements IProductAPI {
     }
 
     @Override
+    public Response addFavourite(String productSlug) {
+        return Response.status(Response.Status.CREATED).entity(productService.addFavourite(productSlug)).build();
+    }
+
+    @Override
+    public Response getFavourites(PageRequest pageRequest) {
+        return Response.ok(productService.getFavouritePagedResponse(pageRequest)).build();
+    }
+
+    @Override
     public Response updateQuantity(@HeaderParam(value = "API_KEY") String apiKey,
                                    ProductQuantityRequest productQuantityRequest) {
         if (!secretAPIKey.equals(apiKey)) {

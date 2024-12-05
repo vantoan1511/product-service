@@ -4,11 +4,9 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <property name="author" value="shopbee"/>
-    <property name="id" value="ps"/>
+    <changeSet id="${id}-1" author="${author}">
+        <modifyDataType tableName="ps_favourite"
+                        columnName="username" newDataType="VARCHAR(255)"/>
+    </changeSet>
 
-    <include file="/db/0.0.1/changeLog.xml"/>
-    <include file="/db/0.0.2/changeLog.xml"/>
-    <include file="/db/0.0.3/changeLog.xml"/>
-    <include file="/db/0.0.4/changeLog.xml"/>
 </databaseChangeLog>

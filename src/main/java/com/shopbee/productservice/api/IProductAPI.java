@@ -45,6 +45,16 @@ public interface IProductAPI {
     @Authenticated
     Response updatePartially(@PathParam("slug") String productSlug, @Valid @NotNull UpdatePartialProductRequest updatePartialProductRequest);
 
+    @POST
+    @Path("{slug}/favourites")
+    @Authenticated
+    Response addFavourite(@PathParam("slug") String productSlug);
+
+    @GET
+    @Path("favourites")
+    @Authenticated
+    Response getFavourites(@Valid PageRequest pageRequest);
+
     @PUT
     @Path("{id}")
     @RolesAllowed({Role.ROLE_ADMIN, Role.ROLE_STAFF})

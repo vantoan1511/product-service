@@ -1,16 +1,10 @@
 package com.shopbee.productservice.service;
 
 import com.shopbee.productservice.dto.*;
-import com.shopbee.productservice.entity.Brand;
-import com.shopbee.productservice.entity.Category;
-import com.shopbee.productservice.entity.Model;
-import com.shopbee.productservice.entity.Product;
+import com.shopbee.productservice.entity.*;
 import com.shopbee.productservice.exception.ProductServiceException;
 import com.shopbee.productservice.mapper.ProductMapper;
-import com.shopbee.productservice.repository.BrandRepository;
-import com.shopbee.productservice.repository.CategoryRepository;
-import com.shopbee.productservice.repository.ModelRepository;
-import com.shopbee.productservice.repository.ProductRepository;
+import com.shopbee.productservice.repository.*;
 import com.shopbee.productservice.shared.converter.impl.ProductConverter;
 import com.shopbee.productservice.shared.external.cart.Cart;
 import com.shopbee.productservice.shared.external.cart.CartServiceClient;
@@ -49,6 +43,7 @@ public class ProductService {
     private final BrandRepository brandRepository;
     private final ModelRepository modelRepository;
     private final CategoryRepository categoryRepository;
+    private final FavouriteRepository favouriteRepository;
     private final ModelService modelService;
     private final CategoryService categoryService;
     private final ProductRepository productRepository;
@@ -81,6 +76,7 @@ public class ProductService {
                           BrandRepository brandRepository,
                           ModelRepository modelRepository,
                           CategoryRepository categoryRepository,
+                          FavouriteRepository favouriteRepository,
                           ModelService modelService,
                           CategoryService categoryService,
                           ProductRepository productRepository,
@@ -95,12 +91,34 @@ public class ProductService {
         this.brandRepository = brandRepository;
         this.modelRepository = modelRepository;
         this.categoryRepository = categoryRepository;
+        this.favouriteRepository = favouriteRepository;
         this.modelService = modelService;
         this.categoryService = categoryService;
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.userService = userService;
         this.identity = identity;
+    }
+
+    public PagedResponse<Favourite> getFavouritePagedResponse(PageRequest pageRequest) {
+        String username = identity.getPrincipal().getName();
+        return PagedResponse.from(favouriteRepository.findByCriteria(pageRequest, username), pageRequest);
+    }
+
+    public Favourite addFavourite(String productSlug) {
+        productRepository.findBySlug(productSlug).orElseThrow(() -> new ProductServiceException("Product not found", Response.Status.NOT_FOUND));
+        String username = identity.getPrincipal().getName();
+        Favourite existing = favouriteRepository.findByProductSlug(productSlug, username);
+        if (Objects.nonNull(existing)) {
+            favouriteRepository.delete(existing);
+            return null;
+        }
+
+        Favourite favourite = new Favourite();
+        favourite.setUsername(identity.getPrincipal().getName());
+        favourite.setProductSlug(productSlug);
+        favouriteRepository.persist(favourite);
+        return favourite;
     }
 
     /**
