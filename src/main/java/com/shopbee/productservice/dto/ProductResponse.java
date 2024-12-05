@@ -5,7 +5,6 @@ import com.shopbee.productservice.entity.Model;
 import com.shopbee.productservice.entity.enums.Color;
 import com.shopbee.productservice.entity.enums.OS;
 import com.shopbee.productservice.entity.enums.StorageType;
-import com.shopbee.productservice.shared.external.review.Review;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -47,6 +46,7 @@ public class ProductResponse implements Serializable {
     private List<Long> imageIds;
     private Long featuredImageId;
     private double rating;
+    private long sales;
     private OffsetDateTime createdAt;
     private OffsetDateTime modifiedAt;
 }

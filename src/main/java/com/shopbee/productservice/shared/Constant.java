@@ -5,4 +5,5 @@ public class Constant {
     public static final String USER_SERVICE_CLIENT = "user-service";
     public static final String RECOMMENDATION_SERVICE_CLIENT = "recommendation-service";
     public static final String CART_SERVICE_CLIENT = "cart-service";
+    public static final String ORDER_SERVICE_CLIENT = "order-service";
 }

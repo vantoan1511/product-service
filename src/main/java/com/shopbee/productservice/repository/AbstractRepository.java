@@ -8,9 +8,6 @@ import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
 import jakarta.ws.rs.core.Response;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public abstract class AbstractRepository {
@@ -33,6 +30,6 @@ public abstract class AbstractRepository {
     }
 
     protected List<SortField> getSupportedSortFields() {
-        return List.of(SortField.NAME, SortField.SLUG, SortField.CREATED_AT);
+        return List.of(SortField.values());
     }
 }

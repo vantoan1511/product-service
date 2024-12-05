@@ -14,6 +14,7 @@ import com.shopbee.productservice.repository.ProductRepository;
 import com.shopbee.productservice.shared.converter.impl.ProductConverter;
 import com.shopbee.productservice.shared.external.cart.Cart;
 import com.shopbee.productservice.shared.external.cart.CartServiceClient;
+import com.shopbee.productservice.shared.external.order.OrderServiceClient;
 import com.shopbee.productservice.shared.external.recommendation.*;
 import com.shopbee.productservice.shared.external.review.ReviewServiceClient;
 import com.shopbee.productservice.shared.external.review.ReviewStatistic;
@@ -44,6 +45,7 @@ public class ProductService {
     private final ReviewServiceClient reviewServiceClient;
     private final CartServiceClient cartServiceClient;
     private final RecommendationServiceClient recommendationServiceClient;
+    private final OrderServiceClient orderServiceClient;
     private final BrandRepository brandRepository;
     private final ModelRepository modelRepository;
     private final CategoryRepository categoryRepository;
@@ -75,6 +77,7 @@ public class ProductService {
                           @RestClient ReviewServiceClient reviewServiceClient,
                           @RestClient CartServiceClient cartServiceClient,
                           @RestClient RecommendationServiceClient recommendationServiceClient,
+                          @RestClient OrderServiceClient orderServiceClient,
                           BrandRepository brandRepository,
                           ModelRepository modelRepository,
                           CategoryRepository categoryRepository,
@@ -88,6 +91,7 @@ public class ProductService {
         this.reviewServiceClient = reviewServiceClient;
         this.cartServiceClient = cartServiceClient;
         this.recommendationServiceClient = recommendationServiceClient;
+        this.orderServiceClient = orderServiceClient;
         this.brandRepository = brandRepository;
         this.modelRepository = modelRepository;
         this.categoryRepository = categoryRepository;
@@ -177,7 +181,20 @@ public class ProductService {
     public ProductResponse getBySlug(String slug) {
         Product product = productRepository.findBySlug(slug)
                 .orElseThrow(() -> new ProductServiceException("Product not found", Response.Status.NOT_FOUND));
-        return toProductResponse(product);
+        ProductResponse response = toProductResponse(product);
+        if (Objects.nonNull(response)) {
+            response.setSales(getSales(slug));
+        }
+        return response;
+    }
+
+    private long getSales(String slug) {
+        try {
+            return orderServiceClient.getSales(slug);
+        } catch (Exception e) {
+            log.warn("Failed to get sales {}", e.getMessage());
+            return 0;
+        }
     }
 
     /**
