@@ -3,10 +3,8 @@ package com.shopbee.productservice.repository;
 import com.shopbee.productservice.dto.PageRequest;
 import com.shopbee.productservice.dto.SortCriteria;
 import com.shopbee.productservice.enums.SortField;
-import com.shopbee.productservice.exception.ProductServiceException;
 import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
-import jakarta.ws.rs.core.Response;
 
 import java.util.List;
 
@@ -15,7 +13,7 @@ public abstract class AbstractRepository {
     public Sort sort(SortCriteria sortCriteria) {
         SortField sortField = sortCriteria.getSortField();
         if (!getSupportedSortFields().contains(sortField)) {
-            throw new ProductServiceException("Unsupported sort field", Response.Status.BAD_REQUEST);
+            return Sort.empty();
         }
 
         Sort sort = Sort.by(sortField.getValue());

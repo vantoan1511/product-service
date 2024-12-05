@@ -132,8 +132,13 @@ public class ProductService {
         Map<String, Product> productSlugMap = activeProducts.stream().collect(Collectors.toMap(Product::getSlug, product -> product));
 
         List<Long> inCarts = getInCartProductSlugs().stream().map(productSlugMap::get).map(Product::getId).toList();
-        Behavior behavior =
-                Behavior.builder().favourites(Collections.emptyList()).inCart(inCarts).recentVisits(Collections.emptyList()).build();
+        List<Long> inFavourites = favouriteRepository.findByCriteria(null, identity.getPrincipal().getName()).stream()
+                .map(Favourite::getProductSlug).map(productSlugMap::get).map(Product::getId).toList();
+        Behavior behavior = Behavior.builder()
+                .favourites(inFavourites)
+                .inCart(inCarts)
+                .recentVisits(Collections.emptyList())
+                .build();
         GetRecommendedProductsRequest getRecommendedProductsRequest =
                 GetRecommendedProductsRequest.builder().behavior(behavior).availableProducts(activeProducts).build();
         GetRecommendationResponse evaluateResponse =
